@@ -1,0 +1,62 @@
+#####################################
+# Filament Sensor #
+#####################################
+[filament_switch_sensor switch_sensor]
+switch_pin: ^PE6
+pause_on_runout: False
+runout_gcode:
+PAUSE # [pause_resume] is required in printer.cfg
+M117 Filament switch runout
+
+insert_gcode:
+M117 Filament switch inserted
+
+[filament_motion_sensor encoder_sensor]
+switch_pin: ^PA4
+detection_length: 2.88
+extruder: extruder
+pause_on_runout: False
+event_delay: 1.5
+pause_delay: 0.5
+runout_gcode:
+PAUSE # [pause_resume] is required in printer.cfg
+M117 Filament encoder runout
+
+insert_gcode:
+M117 Filament encoder inserted
+
+[gcode_macro SFS_ENABLE]
+description: Enable smart filament sensor
+
+gcode:
+M117 ENABLING the Smart Filament Sensor
+G92 E0
+SET_FILAMENT_SENSOR SENSOR=encoder_sensor ENABLE=1 ; Put your filament sensor's name after SENSOR=
+
+[gcode_macro SFS_DISABLE]
+description: Disable smart filament sensor
+
+gcode:
+M117 DISABLING the Smart Filament Sensor
+G92 E0
+SET_FILAMENT_SENSOR SENSOR=encoder_sensor ENABLE=0 ; Put your filament sensor's name after SENSOR=
+
+[delayed_gcode DISABLEFILAMENTSENSOR] ; This will disable the SFS 1 second after klipper starts
+initial_duration: 1
+gcode:
+SET_FILAMENT_SENSOR SENSOR=encoder_sensor ENABLE=0 ; Put your filament sensor's name after SENSOR=
+
+
+### goes into print_start|end
+
+SFS_ENABLE
+
+############# Begin of ptinting #############
+
+and in end print macro:
+
+# Disable steppers
+
+M84
+
+SFS_DISABLE
